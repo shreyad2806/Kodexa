@@ -1,37 +1,15 @@
 # Nexora Backend - Python Dependencies
 
 # Web Framework
-fastapi==0.109.0
-uvicorn[standard]==0.27.0
-pydantic==2.5.3
-pydantic-settings==2.1.0
-
-# Database
-sqlalchemy[asyncio]==2.0.25
-asyncpg==0.29.0
-psycopg2-binary==2.9.9
-
-# Vector Database
-pgvector==0.2.4
+fastapi>=0.109.0
+uvicorn[standard]>=0.27.0
+pydantic>=2.5.3
+pydantic-settings>=2.1.0
 
 # AI/ML
-langchain==0.1.0
-langchain-openai==0.0.5
-langchain-community==0.0.12
-langgraph==0.0.26
-openai==1.10.0
+langchain>=0.1.0
+langchain-ollama>=0.1.0
+langgraph>=0.0.26
 
 # Utilities
-python-dotenv==1.0.0
-python-json-logger==2.0.7
-chardet==5.2.0
-
-# Development
-pytest==7.4.4
-pytest-asyncio==0.23.3
-black==23.12.1
-ruff==0.1.9
-mypy==1.8.0
-
-# TODO: Add additional dependencies as needed
-# TODO: Pin specific versions for production
+python-dotenv>=1.0.0
