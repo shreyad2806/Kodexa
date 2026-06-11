@@ -1,10 +1,10 @@
-from typing import Callable
+from typing import Callable, Any
 from langgraph.graph import StateGraph, END, START
 
-from app.graph.state import DebugState
+from backend.graph.state import DebugState
 
 
-def build_debug_graph(debug_node: Callable) -> StateGraph:
+def build_debug_graph(debug_node: Callable) -> Any:
     workflow = StateGraph(DebugState)
     workflow.add_node("debug", debug_node)
     workflow.set_entry_point(START)
@@ -13,7 +13,7 @@ def build_debug_graph(debug_node: Callable) -> StateGraph:
     return workflow.compile()
 
 
-def build_graph(workflow_type: str = "debug", **node_functions: Callable) -> StateGraph:
+def build_graph(workflow_type: str = "debug", **node_functions: Callable) -> Any:
     if workflow_type == "debug":
         debug_node = node_functions.get("debug")
         if not debug_node:

@@ -2,8 +2,8 @@ import asyncio
 from typing import Optional
 from langchain_ollama import ChatOllama
 
-from app.config import settings
-from app.utils.logger import get_logger
+from backend.config import settings
+from backend.utils.logger import get_logger
 
 
 logger = get_logger("nexora")
@@ -36,6 +36,9 @@ class LLMService:
                 raise
     
     async def invoke(self, prompt: str) -> str:
+        if self._llm is None:
+            raise RuntimeError("LLM not initialized. Call __init__ first.")
+        
         max_retries = 2
         retry_delays = [1, 2]
         
@@ -83,6 +86,8 @@ class LLMService:
                     raise Exception(f"LLM invocation failed: {str(e)}")
     
     def get_llm(self) -> ChatOllama:
+        if self._llm is None:
+            raise RuntimeError("LLM not initialized. Call __init__ first.")
         return self._llm
 
 

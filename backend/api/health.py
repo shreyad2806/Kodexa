@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 from typing import Dict, Any
 
-from app.utils.logger import get_logger
+from backend.utils.logger import get_logger
 
 
 logger = get_logger("nexora")

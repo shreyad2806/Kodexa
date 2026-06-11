@@ -1,10 +1,10 @@
 import json
 from typing import Dict, Any, Optional
 
-from app.graph.state import DebugState
-from app.services.llm_service import get_llm_service
-from app.prompts.debug_prompt import get_debug_prompt
-from app.utils.logger import get_logger
+from backend.graph.state import DebugState
+from backend.services.llm_service import get_llm_service
+from backend.prompts.debug_prompt import get_debug_prompt
+from backend.utils.logger import get_logger
 
 
 logger = get_logger("nexora")
@@ -32,8 +32,8 @@ def parse_llm_response(response: str) -> Optional[Dict[str, Any]]:
 
 async def debug_node(state: DebugState) -> DebugState:
     try:
-        error = state.get("error", "")
-        code = state.get("code", "")
+        error = state.get("error") or ""
+        code = state.get("code") or ""
         
         if not error or not code:
             logger.warning("Missing error or code in state")
@@ -47,9 +47,9 @@ async def debug_node(state: DebugState) -> DebugState:
         parsed_response = parse_llm_response(response)
         
         if parsed_response:
-            state["explanation"] = parsed_response.get("explanation", "")
-            state["fixed_code"] = parsed_response.get("fixed_code", "")
-            state["summary"] = parsed_response.get("summary", "")
+            state["explanation"] = parsed_response.get("explanation") or ""
+            state["fixed_code"] = parsed_response.get("fixed_code") or ""
+            state["summary"] = parsed_response.get("summary") or ""
             logger.info("Successfully parsed LLM response")
         else:
             state["explanation"] = response

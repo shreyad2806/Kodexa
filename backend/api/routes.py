@@ -1,11 +1,11 @@
 from fastapi import APIRouter, HTTPException
 
-from app.models.request import DebugRequest
-from app.models.response import DebugResponse
-from app.graph.state import DebugState
-from app.graph.graph import run_debug_graph
-from app.nodes.debug_node import debug_node
-from app.utils.logger import get_logger
+from backend.models.request import DebugRequest
+from backend.models.response import DebugResponse
+from backend.graph.state import DebugState
+from backend.graph.graph import run_debug_graph
+from backend.nodes.debug_node import debug_node
+from backend.utils.logger import get_logger
 
 
 logger = get_logger("nexora")

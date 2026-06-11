@@ -2,10 +2,10 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.config import settings
-from app.api.routes import router
-from app.api.health import health_router
-from app.utils.logger import setup_logger
+from backend.config import settings
+from backend.api.routes import router
+from backend.api.health import health_router
+from backend.utils.logger import setup_logger
 
 
 logger = setup_logger(
@@ -49,7 +49,7 @@ if __name__ == "__main__":
     import uvicorn
     logger.info(f"Starting server on {settings.HOST}:{settings.PORT}")
     uvicorn.run(
-        "app.main:app",
+        "backend.main:app",
         host=settings.HOST,
         port=settings.PORT,
         reload=settings.DEBUG,
