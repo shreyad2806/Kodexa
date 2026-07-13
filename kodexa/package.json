@@ -1,7 +1,7 @@
 {
   "name": "kodexa",
   "displayName": "Kodexa",
-  "description": "AI Software Engineering Platform",
+  "description": "The inference layer for AI-generated software. Scan, audit, and repair what your AI agents produce.",
   "version": "0.0.1",
   "publisher": "kodexa",
   "engines": {

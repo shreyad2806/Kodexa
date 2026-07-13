@@ -1,71 +1,66 @@
-# kodexa README
+# Kodexa
 
-This is the README for your extension "kodexa". After writing up a brief description, we recommend including the following sections.
+**The inference layer for AI-generated software.**
 
-## Features
-
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
-
-For example if there is an image subfolder under your extension project workspace:
-
-\!\[feature X\]\(images/feature-x.png\)
-
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
-
-## Requirements
-
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
-
-## Extension Settings
-
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
-
-For example:
-
-This extension contributes the following settings:
-
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
-
-## Known Issues
-
-Calling out known issues can help limit users opening duplicate issues against your extension.
-
-## Release Notes
-
-Users appreciate release notes as you update your extension.
-
-### 1.0.0
-
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
+Kodexa sits between your AI coding agents and production. It validates, audits, and repairs what Cursor, Claude Code, Windsurf, and Copilot generate — before it ships.
 
 ---
 
-## Following extension guidelines
+## What it is
 
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
+AI agents write code fast. They also hallucinate, duplicate abstractions, introduce dead code, and create architecture that doesn't scale.
 
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
+Kodexa is the engineering platform that closes that gap. Not a linter. Not a copilot. An inference engine that understands your repository at the architectural level and produces verified, production-ready output.
 
-## Working with Markdown
+---
 
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
+## Tagline
 
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
+> *The inference layer between AI agents and production software.*
 
-## For more information
+---
 
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
+## Elevator pitch
 
-**Enjoy!**
+AI coding agents generate software at a pace that outstrips human review. Kodexa is the platform that audits that output — scanning repositories for hallucinations, dead abstractions, security risks, and structural debt — and generating targeted, verified fixes. It's the quality layer that makes AI-generated software trustworthy at scale.
+
+---
+
+## Features
+
+**Repository Scan**
+Full structural analysis of your codebase. Detects AI-generated patterns that degrade maintainability — duplicate logic, bloated modules, broken abstractions.
+
+**Architecture Review**
+Inference-level audit across your repository. Surfaces hallucinations, dead code, token-wasteful patterns, scalability blockers, and security risks introduced by AI agents.
+
+**Generate Fixes**
+Produces refactors, structural corrections, and verified replacements. Output is precise, scoped, and production-ready — not suggestions, not diffs that need rewriting.
+
+---
+
+## Marketplace description
+
+Kodexa is an AI Software Engineering Platform built for teams shipping AI-generated code.
+
+It integrates directly into VS Code as a sidebar panel. Scan your repository, run an architecture-level review, and generate verified fixes — all without leaving your editor.
+
+Built for codebases touched by Cursor, Claude Code, Windsurf, GitHub Copilot, or any LLM-based agent. Kodexa validates what they produce and makes it safe to ship.
+
+**Not a chat interface. Not a code completion tool. An inference engine.**
+
+---
+
+## Who it's for
+
+- Engineering teams adopting AI agents in production workflows
+- Platform teams responsible for code quality across AI-generated output
+- Senior engineers who review and own what the agents write
+
+---
+
+## Release notes
+
+### 0.1.0
+
+Initial release. Repository Scan, Architecture Review, and Generate Fixes available from the VS Code sidebar.
