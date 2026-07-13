@@ -1,66 +1,250 @@
+<div align="center">
+
 # Kodexa
 
-**The inference layer for AI-generated software.**
+### The Inference Engine for AI-Generated Software
 
-Kodexa sits between your AI coding agents and production. It validates, audits, and repairs what Cursor, Claude Code, Windsurf, and Copilot generate — before it ships.
+**Bridging the gap between AI code generation and production-ready engineering.**
 
----
-
-## What it is
-
-AI agents write code fast. They also hallucinate, duplicate abstractions, introduce dead code, and create architecture that doesn't scale.
-
-Kodexa is the engineering platform that closes that gap. Not a linter. Not a copilot. An inference engine that understands your repository at the architectural level and produces verified, production-ready output.
+> AI coding agents generate code. Kodexa validates, repairs, and engineers it.
 
 ---
 
-## Tagline
+<img src="images/lifecycle.png" width="100%"/>
 
-> *The inference layer between AI agents and production software.*
-
----
-
-## Elevator pitch
-
-AI coding agents generate software at a pace that outstrips human review. Kodexa is the platform that audits that output — scanning repositories for hallucinations, dead abstractions, security risks, and structural debt — and generating targeted, verified fixes. It's the quality layer that makes AI-generated software trustworthy at scale.
+</div>
 
 ---
 
-## Features
+# Why Kodexa?
 
-**Repository Scan**
-Full structural analysis of your codebase. Detects AI-generated patterns that degrade maintainability — duplicate logic, bloated modules, broken abstractions.
+AI coding assistants can build software faster than ever.
 
-**Architecture Review**
-Inference-level audit across your repository. Surfaces hallucinations, dead code, token-wasteful patterns, scalability blockers, and security risks introduced by AI agents.
+They also introduce:
 
-**Generate Fixes**
-Produces refactors, structural corrections, and verified replacements. Output is precise, scoped, and production-ready — not suggestions, not diffs that need rewriting.
+- Hallucinated APIs
+- Duplicate abstractions
+- Dead code
+- Circular dependencies
+- Token-heavy implementations
+- Security vulnerabilities
+- Architecture drift
+- Poor maintainability
 
----
+Current AI coding tools optimize **generation**.
 
-## Marketplace description
+Kodexa optimizes **engineering**.
 
-Kodexa is an AI Software Engineering Platform built for teams shipping AI-generated code.
-
-It integrates directly into VS Code as a sidebar panel. Scan your repository, run an architecture-level review, and generate verified fixes — all without leaving your editor.
-
-Built for codebases touched by Cursor, Claude Code, Windsurf, GitHub Copilot, or any LLM-based agent. Kodexa validates what they produce and makes it safe to ship.
-
-**Not a chat interface. Not a code completion tool. An inference engine.**
+Instead of acting like another coding assistant, Kodexa sits between AI agents and production, continuously validating and improving generated software before it ships.
 
 ---
 
-## Who it's for
+# The Problem
 
-- Engineering teams adopting AI agents in production workflows
-- Platform teams responsible for code quality across AI-generated output
-- Senior engineers who review and own what the agents write
+Today's AI coding workflow is mostly reactive.
+
+```
+Prompt
+      ↓
+Cursor / Copilot / Claude Code
+      ↓
+Large Pull Request
+      ↓
+Human Review
+      ↓
+Production
+```
+
+Problems discovered only after generation:
+
+- Hallucinations
+- Technical debt
+- Duplicate implementations
+- Context explosion
+- Security issues
+- Broken architecture
+- Poor scalability
 
 ---
 
-## Release notes
+# The Kodexa Approach
 
-### 0.1.0
+Kodexa introduces an **Inference Layer** between generation and production.
 
-Initial release. Repository Scan, Architecture Review, and Generate Fixes available from the VS Code sidebar.
+```
+Developer
+      ↓
+AI Coding Agent
+      ↓
+Kodexa Inference Engine
+      ↓
+Verified Production Code
+```
+
+Instead of asking:
+
+> "Can AI write code?"
+
+Kodexa asks:
+
+> "Can AI-generated software survive production?"
+
+---
+
+# Architecture
+
+<div align="center">
+
+<img src="images/architecture.png" width="95%"/>
+
+</div>
+
+Kodexa continuously understands repositories, reasons over architecture, detects hallucinations, predicts future engineering problems, generates repairs, verifies the fixes, and feeds improvements back into the repository.
+
+This creates a continuous engineering loop rather than a one-time code generation workflow.
+
+---
+
+# Core Capabilities
+
+## Repository Intelligence
+
+Understand the repository beyond files.
+
+- Repository graph
+- Dependency mapping
+- Semantic understanding
+- Duplicate abstraction detection
+- Context compression
+
+---
+
+## Architecture Review
+
+Analyze software quality rather than syntax.
+
+Detects:
+
+- Hallucinated APIs
+- Dead code
+- Circular dependencies
+- Technical debt
+- Scalability bottlenecks
+- Architecture smells
+- Context bloat
+
+---
+
+## Autonomous Repair
+
+Generate production-grade improvements.
+
+Produces:
+
+- Architectural refactors
+- Minimal repair patches
+- Dependency cleanup
+- Duplicate removal
+- Performance improvements
+- Token optimization
+- Security fixes
+
+---
+
+## Verification Loop
+
+Every generated change is validated.
+
+Verification includes:
+
+- Static analysis
+- Type checking
+- Linting
+- Build validation
+- Confidence scoring
+
+---
+
+# Why Kodexa is Different
+
+| AI Coding Assistant | Kodexa |
+|---------------------|---------|
+| Generates code | Engineers software |
+| Focuses on prompts | Understands repositories |
+| Reactive | Predictive |
+| File-level | Repository-level |
+| One-shot generation | Continuous improvement |
+| Optimizes completion | Optimizes architecture |
+
+---
+
+# Vision
+
+AI-generated software should be:
+
+- Production-ready
+- Maintainable
+- Secure
+- Scalable
+- Verifiable
+
+Kodexa is building the engineering layer that makes this possible.
+
+---
+
+# Roadmap
+
+### Phase 1
+
+- Repository Intelligence
+- Architecture Review
+- Repository Repair
+
+### Phase 2
+
+- Semantic Repository Graph
+- Autonomous Verification Loop
+- Architecture Diff Engine
+- Context Compression
+
+### Phase 3
+
+- Multi-Agent Inference
+- Self-Healing Repositories
+- Continuous Engineering
+- CI/CD Integration
+
+---
+
+# Built For
+
+- VS Code
+- Cursor
+- Windsurf
+- Claude Code
+- GitHub Copilot
+- AI-assisted engineering teams
+
+---
+
+# Philosophy
+
+> Generation is easy.
+
+> Engineering is hard.
+
+> **Kodexa bridges the gap.**
+
+---
+
+# Status
+
+🚧 Active Development
+
+The current release focuses on repository understanding, architecture reasoning, autonomous repair, and continuous engineering workflows.
+
+Future versions will introduce autonomous repository improvement and inference-driven software engineering.
+
+---
+
+Made with ❤️ for the future of AI software engineering.
