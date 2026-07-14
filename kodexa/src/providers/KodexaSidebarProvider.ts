@@ -43,6 +43,9 @@ export class KodexaSidebarProvider implements vscode.WebviewViewProvider {
 					case 'optimize':
 						vscode.commands.executeCommand('kodexa.optimize');
 						break;
+					case 'repositoryScan':
+						vscode.commands.executeCommand('kodexa.repositoryScan');
+						break;
 				}
 			}
 		);
@@ -178,16 +181,18 @@ export class KodexaSidebarProvider implements vscode.WebviewViewProvider {
         /* ── REPO CARD ──────────────────────────── */
         .repo-card {
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             justify-content: space-between;
             background: var(--s1);
             border: 1px solid var(--bd);
             border-radius: var(--r);
-            padding: 9px 12px;
+            padding: 10px 12px;
             margin-bottom: 12px;
+            min-height: 72px;
         }
 
-        .repo-left { display: flex; flex-direction: column; gap: 2px; }
+        .repo-left { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 0; }
+        .repo-right { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; flex-shrink: 0; margin-left: 8px; }
 
         .repo-label {
             font-size: 9px;
@@ -204,9 +209,28 @@ export class KodexaSidebarProvider implements vscode.WebviewViewProvider {
             letter-spacing: -0.1px;
         }
 
+        .repo-name.dim { color: var(--t2); }
+
         .repo-meta {
             font-size: 10.5px;
             color: var(--t2);
+        }
+
+        .repo-languages {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            margin-top: 2px;
+        }
+
+        .repo-lang {
+            font-size: 9.5px;
+            font-weight: 500;
+            color: var(--blue-lt);
+            background: var(--blue-glow);
+            border: 1px solid var(--blue-bd);
+            border-radius: 10px;
+            padding: 1px 6px;
         }
 
         .repo-status {
@@ -218,6 +242,55 @@ export class KodexaSidebarProvider implements vscode.WebviewViewProvider {
             border-radius: 10px;
             padding: 2px 8px;
         }
+
+        .repo-status.loading {
+            color: var(--blue-lt);
+            background: var(--blue-glow);
+            border-color: var(--blue-bd);
+        }
+
+        .repo-status.error {
+            color: #f87171;
+            background: rgba(248,113,113,0.08);
+            border-color: rgba(248,113,113,0.20);
+        }
+
+        .repo-status.empty {
+            color: #fbbf24;
+            background: rgba(251,191,36,0.08);
+            border-color: rgba(251,191,36,0.20);
+        }
+
+        .repo-counts {
+            display: flex;
+            gap: 10px;
+            font-size: 10px;
+            color: var(--t2);
+        }
+
+        .repo-counts strong {
+            color: var(--t1);
+            font-weight: 600;
+        }
+
+        .repo-loading {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 10.5px;
+            color: var(--t2);
+        }
+
+        .spinner {
+            width: 12px;
+            height: 12px;
+            border: 1.5px solid var(--blue-bd);
+            border-top-color: var(--blue-lt);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
 
         /* ── SECTION LABEL ──────────────────────── */
         .sec-label {
@@ -412,12 +485,17 @@ export class KodexaSidebarProvider implements vscode.WebviewViewProvider {
     </header>
 
     <!-- REPO CARD -->
-    <div class="repo-card">
+    <div class="repo-card" id="repo-card">
         <div class="repo-left">
             <span class="repo-label">Repository</span>
-            <span class="repo-name" id="repo-name">Python &bull; 58 files</span>
+            <span class="repo-name dim" id="repo-name">No workspace open</span>
+            <span class="repo-meta" id="repo-meta">Click Run to analyze</span>
+            <div class="repo-languages" id="repo-languages"></div>
         </div>
-        <span class="repo-status">Ready</span>
+        <div class="repo-right">
+            <span class="repo-status" id="repo-status">Idle</span>
+            <div class="repo-counts" id="repo-counts"></div>
+        </div>
     </div>
 
     <!-- ACTION CARDS -->
@@ -434,7 +512,7 @@ export class KodexaSidebarProvider implements vscode.WebviewViewProvider {
                 </svg>
             </span>
             <span class="acard-title">Repository Scan</span>
-            <button class="acard-btn" data-command="debug">Run</button>
+            <button class="acard-btn" data-command="repositoryScan">Run</button>
         </div>
 
         <div class="acard">
@@ -487,12 +565,91 @@ export class KodexaSidebarProvider implements vscode.WebviewViewProvider {
     (function () {
         const vscode = acquireVsCodeApi();
 
+        var repoNameEl       = document.getElementById('repo-name');
+        var repoMetaEl       = document.getElementById('repo-meta');
+        var repoStatusEl     = document.getElementById('repo-status');
+        var repoCountsEl     = document.getElementById('repo-counts');
+        var repoLanguagesEl  = document.getElementById('repo-languages');
+
+        function setRepoLoading() {
+            repoNameEl.textContent = 'Scanning repository...';
+            repoNameEl.classList.add('dim');
+            repoMetaEl.innerHTML = '<div class="repo-loading"><span class="spinner"></span>Analyzing files...</div>';
+            repoStatusEl.textContent = 'Scanning';
+            repoStatusEl.className = 'repo-status loading';
+            repoCountsEl.innerHTML = '';
+            repoLanguagesEl.innerHTML = '';
+        }
+
+        function setRepoData(repositoryContext) {
+            var summary = repositoryContext.summary;
+            var stats = repositoryContext.stats;
+
+            repoNameEl.textContent = summary.name;
+            repoNameEl.classList.remove('dim');
+
+            var primary = stats.primaryLanguage || 'Unknown';
+            repoMetaEl.textContent = 'Primary language: ' + primary;
+
+            repoStatusEl.textContent = 'Ready';
+            repoStatusEl.className = 'repo-status';
+
+            repoCountsEl.innerHTML =
+                '<span><strong>' + summary.totalFiles + '</strong> files</span>' +
+                '<span><strong>' + summary.totalFolders + '</strong> folders</span>';
+
+            repoLanguagesEl.innerHTML = '';
+            if (Array.isArray(stats.languages) && stats.languages.length > 0) {
+                stats.languages.forEach(function (lang) {
+                    var span = document.createElement('span');
+                    span.className = 'repo-lang';
+                    span.textContent = lang;
+                    repoLanguagesEl.appendChild(span);
+                });
+            }
+        }
+
+        function setRepoEmpty(repositoryContext) {
+            repoNameEl.textContent = repositoryContext.summary.name;
+            repoNameEl.classList.remove('dim');
+            repoMetaEl.textContent = 'Workspace is empty — no files found.';
+            repoStatusEl.textContent = 'Empty';
+            repoStatusEl.className = 'repo-status empty';
+            repoCountsEl.innerHTML =
+                '<span><strong>0</strong> files</span>' +
+                '<span><strong>' + repositoryContext.summary.totalFolders + '</strong> folders</span>';
+            repoLanguagesEl.innerHTML = '';
+        }
+
+        function setRepoNoWorkspace() {
+            repoNameEl.textContent = 'No workspace open';
+            repoNameEl.classList.add('dim');
+            repoMetaEl.textContent = 'Open a folder to analyze a repository.';
+            repoStatusEl.textContent = 'No workspace';
+            repoStatusEl.className = 'repo-status empty';
+            repoCountsEl.innerHTML = '';
+            repoLanguagesEl.innerHTML = '';
+        }
+
+        function setRepoError(error) {
+            repoNameEl.textContent = 'Scan failed';
+            repoNameEl.classList.add('dim');
+            repoMetaEl.textContent = error || 'Could not analyze repository.';
+            repoStatusEl.textContent = 'Error';
+            repoStatusEl.className = 'repo-status error';
+            repoCountsEl.innerHTML = '';
+            repoLanguagesEl.innerHTML = '';
+        }
+
         // ── Button click → postMessage to extension host ──
         const buttons = document.querySelectorAll('.acard-btn');
         buttons.forEach(function (button) {
             button.addEventListener('click', function () {
                 var command = button.getAttribute('data-command');
                 if (command) {
+                    if (command === 'repositoryScan') {
+                        setRepoLoading();
+                    }
                     vscode.postMessage({ command: command });
                 }
             });
@@ -522,18 +679,28 @@ export class KodexaSidebarProvider implements vscode.WebviewViewProvider {
                 var contextContainer = document.getElementById('context-container');
                 if (contextContainer) {
                     contextContainer.textContent = JSON.stringify(message.payload, null, 2);
-                    // Make panel visible
                     var outputPanel = document.getElementById('output-panel');
                     if (outputPanel) {
                         outputPanel.classList.remove('hidden');
                     }
-                    // Ensure body is expanded when new data arrives
                     if (!isOpen) {
                         isOpen = true;
                         contextContainer.classList.remove('collapsed');
                         panelChevron.classList.add('open');
                     }
                 }
+            }
+            else if (message.command === 'repositoryData') {
+                setRepoData(message.repositoryContext);
+            }
+            else if (message.command === 'repositoryEmpty') {
+                setRepoEmpty(message.repositoryContext);
+            }
+            else if (message.command === 'repositoryError') {
+                setRepoError(message.error);
+            }
+            else if (message.command === 'noWorkspace') {
+                setRepoNoWorkspace();
             }
         });
     }());

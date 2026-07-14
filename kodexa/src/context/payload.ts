@@ -10,7 +10,7 @@ import { getOpenedEditors } from './editor';
 import { getWorkspaceFiles } from './workspace';
 import { getWorkspaceFolders } from './workspace';
 import { TerminalContextManager } from './terminal';
-import { buildRepositoryContext } from './repository/repositoryContext';
+import { buildRepositoryContext, RepositoryContext } from './repository/repositoryContext';
 
 export interface DebugPayload {
 	error?: string;
@@ -53,7 +53,7 @@ export interface ContextPayload {
 	workspace?: any[];
 	folders?: any[];
 	terminalLogs?: string[];
-	repositoryContext?: any;
+	repositoryContext?: RepositoryContext;
 	timestamp: number;
 }
 

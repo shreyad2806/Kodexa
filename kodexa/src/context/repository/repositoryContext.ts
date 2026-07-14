@@ -2,9 +2,9 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import {
 	scanRepository,
-	RepositoryScanResult,
-	getWorkspaceRoot
+	RepositoryScanResult
 } from './scanner';
+import { getWorkspaceRoot } from './workspaceRoot';
 import {
 	detectLanguages,
 	DetectedLanguage,

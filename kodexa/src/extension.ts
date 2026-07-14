@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { registerDebugCommand } from './commands/debug';
 import { registerExplainCommand } from './commands/explain';
 import { registerOptimizeCommand } from './commands/optimize';
+import { registerRepositoryScanCommand } from './commands/repositoryScan';
 import { KodexaSidebarProvider } from './providers/KodexaSidebarProvider';
 import { TerminalContextManager } from './context/terminal';
 
@@ -17,6 +18,7 @@ export function activate(context: vscode.ExtensionContext) {
 		registerDebugCommand(context);
 		registerExplainCommand(context);
 		registerOptimizeCommand(context);
+		registerRepositoryScanCommand(context);
 
 		const sidebarProvider = new KodexaSidebarProvider(context.extensionUri);
 

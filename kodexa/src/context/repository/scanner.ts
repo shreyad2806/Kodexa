@@ -1,6 +1,5 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import * as vscode from 'vscode';
 
 /**
  * Repository Scanner — Phase 1, Step 1
@@ -73,15 +72,6 @@ export interface FileMetadata {
 
 	/** Last modification time. */
 	modifiedAt: Date;
-
-	/**
-	 * Programming language inferred from the extension.
-	 *
-	 * Why:
-	 *   - Downstream AI analysis can group files by language without re-implementing
-	 *     extension-to-language mapping. We keep the mapping minimal and extensible.
-	 */
-	language?: string;
 }
 
 /**
@@ -165,33 +155,17 @@ export interface ScannerOptions {
 }
 
 /**
- * Resolve the active workspace root.
- *
- * Why return undefined instead of throwing:
- *   - The scanner itself is decoupled from VS Code. The workspace helper is only a
-	 *     convenience for callers that live in the extension host. Returning undefined
-	 *     lets the caller decide how to communicate "no workspace open" to the user.
- *
- * @returns The first workspace folder path, or undefined if no workspace is open.
- */
-export function getWorkspaceRoot(): string | undefined {
-	const workspaceFolders = vscode.workspace.workspaceFolders;
-	if (!workspaceFolders || workspaceFolders.length === 0) {
-		return undefined;
-	}
-	return workspaceFolders[0].uri.fsPath;
-}
-
-/**
  * Normalize a user-supplied ignore set into a Set<string>.
  *
  * Why:
  *   - Accepts both arrays and Sets so callers can use whichever is convenient,
-	 *     while internally we always use the O(1) Set lookup.
+ *     while internally we always use the O(1) Set lookup.
  */
 function normalizeIgnoredDirs(ignoredDirs?: Set<string> | string[]): Set<string> {
+	// Always clone the default set so callers cannot accidentally mutate the
+	// shared constant. A custom override is used as-is.
 	if (!ignoredDirs) {
-		return DEFAULT_IGNORED_DIRS;
+		return new Set(DEFAULT_IGNORED_DIRS);
 	}
 	if (ignoredDirs instanceof Set) {
 		return ignoredDirs;
@@ -200,51 +174,11 @@ function normalizeIgnoredDirs(ignoredDirs?: Set<string> | string[]): Set<string>
 }
 
 /**
- * Infer a programming language from a file extension.
- *
- * Why a small mapping instead of a full parser:
-	 *   - Language detection is only needed for coarse grouping. We avoid a heavy
-	 *     dependency and keep the scanner lightweight.
- */
-function inferLanguage(extension: string): string | undefined {
-	const mapping: Record<string, string> = {
-		ts: 'typescript',
-		tsx: 'typescript',
-		js: 'javascript',
-		jsx: 'javascript',
-		py: 'python',
-		go: 'go',
-		rs: 'rust',
-		java: 'java',
-		kt: 'kotlin',
-		cs: 'csharp',
-		cpp: 'cpp',
-		c: 'c',
-		h: 'c',
-		php: 'php',
-		rb: 'ruby',
-		swift: 'swift',
-		md: 'markdown',
-		yml: 'yaml',
-		yaml: 'yaml',
-		json: 'json',
-		html: 'html',
-		css: 'css',
-		scss: 'scss',
-		sql: 'sql',
-		sh: 'shell',
-		bash: 'shell',
-		ps1: 'powershell'
-	};
-	return mapping[extension.toLowerCase()];
-}
-
-/**
  * Build a FileMetadata object from a fs.Stats entry.
  *
  * Why keep the absolute path:
-	 *   - Callers that open documents or run diagnostics need the absolute path. The
-	 *     relative path is kept for tree display and AI context windows.
+ *   - Callers that open documents or run diagnostics need the absolute path. The
+ *     relative path is kept for tree display and AI context windows.
  */
 function buildFileMetadata(
 	name: string,
@@ -259,8 +193,7 @@ function buildFileMetadata(
 		relativePath: path.relative(rootPath, absolutePath).split(path.sep).join('/'),
 		extension,
 		size: stat.size,
-		modifiedAt: stat.mtime,
-		language: inferLanguage(extension)
+		modifiedAt: stat.mtime
 	};
 }
 
@@ -268,13 +201,13 @@ function buildFileMetadata(
  * Recursively scan a directory and return a populated tree node.
  *
  * Why fs.promises instead of synchronous fs:
-   *   - The extension host must remain responsive. Blocking synchronous calls on large
-	 *     repositories would freeze the UI. Async I/O interleaves with the event loop.
+ *   - The extension host must remain responsive. Blocking synchronous calls on large
+ *     repositories would freeze the UI. Async I/O interleaves with the event loop.
  *
  * Why depth-first, returning one node at a time:
-	 *   - It keeps the call stack bounded by the filesystem depth rather than the total
-	 *     number of entries, and it produces a natural recursive tree structure with no
-	 *     post-processing pass.
+ *   - It keeps the call stack bounded by the filesystem depth rather than the total
+ *     number of entries, and it produces a natural recursive tree structure with no
+ *     post-processing pass.
  *
  * @param dirPath - Absolute path to scan.
  * @param rootPath - Original scan root, used for relative path calculation.
@@ -346,9 +279,9 @@ async function scanDirectory(
 		}
 
 		if (entry.isFile() || entry.isSymbolicLink()) {
-			// Symbolic links are followed. Why: common in monorepos (e.g. pnpm) where
-			// source packages are symlinked into node_modules. We already skip node_modules,
-			// so following symlinks elsewhere is usually the desired behavior.
+			// Follow symbolic links that resolve to regular files. Directory symlinks
+			// are skipped to avoid cycles. This covers the common monorepo case where
+			// source packages are linked as files, while node_modules is already ignored.
 			let stat: fs.Stats;
 			try {
 				stat = await fs.promises.stat(entryPath);
@@ -385,24 +318,16 @@ async function scanDirectory(
  *   - Failing fast with a clear message is better than returning an empty tree and
  *     forcing the caller to guess whether the workspace is empty or the path is wrong.
  *
- * @param rootPath - Directory to scan. If omitted, the active workspace root is used.
+ * @param rootPath - Directory to scan.
  * @param options - Scanner options.
  * @returns A fully populated RepositoryScanResult.
  */
 export async function scanRepository(
-	rootPath?: string,
+	rootPath: string,
 	options: ScannerOptions = {}
 ): Promise<RepositoryScanResult> {
-	const resolvedRoot = rootPath ?? getWorkspaceRoot();
-
-	if (!resolvedRoot) {
-		throw new Error(
-			'[kodexa] No scan root provided and no workspace is open.'
-		);
-	}
-
-	if (!(await fs.promises.stat(resolvedRoot)).isDirectory()) {
-		throw new Error(`[kodexa] Scan root is not a directory: ${resolvedRoot}`);
+	if (!(await fs.promises.stat(rootPath)).isDirectory()) {
+		throw new Error(`[kodexa] Scan root is not a directory: ${rootPath}`);
 	}
 
 	const ignoredDirs = normalizeIgnoredDirs(options.ignoredDirs);
@@ -414,8 +339,8 @@ export async function scanRepository(
 	};
 
 	const tree = await scanDirectory(
-		resolvedRoot,
-		resolvedRoot,
+		rootPath,
+		rootPath,
 		ignoredDirs,
 		maxDepth,
 		options.fileFilter,
@@ -423,7 +348,7 @@ export async function scanRepository(
 	);
 
 	return {
-		rootPath: resolvedRoot,
+		rootPath,
 		totalFiles: accumulator.totalFiles,
 		totalFolders: accumulator.totalFolders,
 		tree,

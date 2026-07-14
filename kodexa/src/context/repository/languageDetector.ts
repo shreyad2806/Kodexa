@@ -107,20 +107,7 @@ export function detectLanguage(extension: string): DetectedLanguage | undefined 
  * @param files - Files returned by the repository scanner.
  */
 export function detectLanguages(files: FileMetadata[]): LanguageDetectionResult {
-	const languageCounts: Record<DetectedLanguage, number> = {
-		python: 0,
-		typescript: 0,
-		javascript: 0,
-		java: 0,
-		cpp: 0,
-		go: 0,
-		rust: 0,
-		csharp: 0,
-		php: 0,
-		kotlin: 0,
-		swift: 0
-	};
-
+	const languageCounts: Partial<Record<DetectedLanguage, number>> = {};
 	const extensionCounts: Record<string, number> = {};
 
 	for (const file of files) {
@@ -130,15 +117,17 @@ export function detectLanguages(files: FileMetadata[]): LanguageDetectionResult 
 
 		const language = detectLanguage(file.extension);
 		if (language) {
-			languageCounts[language] += 1;
+			languageCounts[language] = (languageCounts[language] || 0) + 1;
 		}
 	}
 
 	// Sort languages by file count descending, then alphabetically for stability.
 	const languages = (Object.keys(languageCounts) as DetectedLanguage[])
-		.filter((language) => languageCounts[language] > 0)
+		.filter((language) => languageCounts[language] && languageCounts[language]! > 0)
 		.sort((a, b) => {
-			const countDiff = languageCounts[b] - languageCounts[a];
+			const countA = languageCounts[a] || 0;
+			const countB = languageCounts[b] || 0;
+			const countDiff = countB - countA;
 			return countDiff !== 0 ? countDiff : a.localeCompare(b);
 		});
 
