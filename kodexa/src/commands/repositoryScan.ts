@@ -16,8 +16,6 @@ export function registerRepositoryScanCommand(
 		'kodexa.repositoryScan',
 		async () => {
 			try {
-				// Loading state is shown by the webview immediately when the button
-				// is clicked; we keep the extension-side messaging focused on results.
 				const repositoryContext = await buildRepositoryContext();
 
 				if (!repositoryContext) {
@@ -37,8 +35,10 @@ export function registerRepositoryScanCommand(
 					command: 'repositoryData',
 					repositoryContext
 				});
+				console.log(
+					"[Kodexa] Repository scanned successfully."
+				);
 			} catch (err) {
-				console.error('[kodexa] Repository scan failed:', err);
 				const message = err instanceof Error ? err.message : 'Unknown scan error';
 				KodexaSidebarProvider.postMessage({
 					command: 'repositoryError',

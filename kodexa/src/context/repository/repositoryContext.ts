@@ -158,13 +158,8 @@ export async function buildRepositoryContext(
 	}
 
 	const scan = await scanRepository(resolvedRoot);
-
-	// Language detection runs entirely in-memory over the scanned files.
-	// This keeps I/O bounded to the scanner and lets us swap detection
-	// strategies later without touching the filesystem again.
 	const languageResult: LanguageDetectionResult = detectLanguages(scan.files);
 
-	// Sort in-memory copies so we do not mutate the original scan result.
 	const bySize = [...scan.files].sort((a, b) => b.size - a.size).slice(0, 10);
 	const byModified = [...scan.files]
 		.sort((a, b) => b.modifiedAt.getTime() - a.modifiedAt.getTime())
