@@ -3,9 +3,13 @@ import * as vscode from 'vscode';
 import {
 	scanRepository,
 	RepositoryScanResult,
-	FileMetadata,
 	getWorkspaceRoot
 } from './scanner';
+import {
+	detectLanguages,
+	DetectedLanguage,
+	LanguageDetectionResult
+} from './languageDetector';
 
 /**
  * Repository Context — Phase 1, Step 2
@@ -52,11 +56,17 @@ export interface RepositorySummary {
  *     the same numbers everywhere.
  */
 export interface RepositoryStats {
-	/** Count of files per inferred language. */
-	languages: Record<string, number>;
+	/**
+	 * Languages detected in the repository, ordered by file count.
+	 * Supplied by the language detector.
+	 */
+	languages: DetectedLanguage[];
 
-	/** Count of files per extension. */
-	extensions: Record<string, number>;
+	/** The dominant language, or an empty string if none could be inferred. */
+	primaryLanguage: DetectedLanguage | '';
+
+	/** Raw counts of every file extension encountered. */
+	extensionCounts: Record<string, number>;
 
 	/** Top files by size. */
 	largestFiles: Array<{
@@ -127,28 +137,6 @@ export interface RepositoryContext {
 }
 
 /**
- * Aggregate language and extension counts from a list of file metadata.
- */
-function aggregateCounts(files: FileMetadata[]): {
-	languages: Record<string, number>;
-	extensions: Record<string, number>;
-} {
-	const languages: Record<string, number> = {};
-	const extensions: Record<string, number> = {};
-
-	for (const file of files) {
-		if (file.language) {
-			languages[file.language] = (languages[file.language] || 0) + 1;
-		}
-		if (file.extension) {
-			extensions[file.extension] = (extensions[file.extension] || 0) + 1;
-		}
-	}
-
-	return { languages, extensions };
-}
-
-/**
  * Build the RepositoryContext snapshot.
  *
  * Why scan first, then aggregate:
@@ -170,7 +158,11 @@ export async function buildRepositoryContext(
 	}
 
 	const scan = await scanRepository(resolvedRoot);
-	const { languages, extensions } = aggregateCounts(scan.files);
+
+	// Language detection runs entirely in-memory over the scanned files.
+	// This keeps I/O bounded to the scanner and lets us swap detection
+	// strategies later without touching the filesystem again.
+	const languageResult: LanguageDetectionResult = detectLanguages(scan.files);
 
 	// Sort in-memory copies so we do not mutate the original scan result.
 	const bySize = [...scan.files].sort((a, b) => b.size - a.size).slice(0, 10);
@@ -189,8 +181,9 @@ export async function buildRepositoryContext(
 			scannedAt: scan.scannedAt
 		},
 		stats: {
-			languages,
-			extensions,
+			languages: languageResult.languages,
+			primaryLanguage: languageResult.primaryLanguage,
+			extensionCounts: languageResult.extensionCounts,
 			largestFiles: bySize.map((file) => ({
 				name: file.name,
 				relativePath: file.relativePath,
