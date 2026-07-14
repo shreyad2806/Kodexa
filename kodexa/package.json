@@ -1,4 +1,5 @@
 {
+  "$schema": "https://json.schemastore.org/package.json",
   "name": "kodexa",
   "displayName": "Kodexa",
   "description": "The inference layer for AI-generated software. Scan, audit, and repair what your AI agents produce.",
