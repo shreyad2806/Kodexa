@@ -10,6 +10,7 @@ import { getOpenedEditors } from './editor';
 import { getWorkspaceFiles } from './workspace';
 import { getWorkspaceFolders } from './workspace';
 import { TerminalContextManager } from './terminal';
+import { buildRepositoryContext } from './repository/repositoryContext';
 
 export interface DebugPayload {
 	error?: string;
@@ -52,6 +53,7 @@ export interface ContextPayload {
 	workspace?: any[];
 	folders?: any[];
 	terminalLogs?: string[];
+	repositoryContext?: any;
 	timestamp: number;
 }
 
@@ -94,6 +96,12 @@ export async function buildContextPayload(): Promise<ContextPayload> {
 		payload.folders = await getWorkspaceFolders();
 	} catch (error) {
 		console.error('Failed to get workspace folders:', error);
+	}
+
+	try {
+		payload.repositoryContext = await buildRepositoryContext();
+	} catch (error) {
+		console.error('Failed to build repository context:', error);
 	}
 
 	try {
